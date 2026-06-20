@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f0fdf4;
+  --foreground: #1a2e1a;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @theme inline {
@@ -12,15 +13,175 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@layer components {
+  .field-label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+
+  .field-input {
+    @apply mt-1.5 w-full min-h-12 rounded-xl border border-gray-200 bg-white px-4 py-3 text-base text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200;
+  }
+
+  .field-textarea {
+    @apply mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200;
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-green-600 px-4 py-3 text-base font-medium text-white transition active:scale-[0.98] hover:bg-green-700 disabled:opacity-50;
+  }
+
+  .btn-primary-sm {
+    @apply inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-green-600 px-4 py-2.5 text-sm font-medium text-white transition active:scale-[0.98] hover:bg-green-700;
+  }
+
+  .btn-secondary {
+    @apply inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-green-600 bg-white px-4 py-3 text-base font-medium text-green-700 transition active:scale-[0.98] hover:bg-green-50;
+  }
+
+  .btn-danger-text {
+    @apply inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg px-3 text-sm text-red-500 transition active:bg-red-50 hover:text-red-700;
+  }
+
+  .card {
+    @apply rounded-2xl border border-green-100 bg-white p-4 shadow-sm sm:p-5;
+  }
+
+  .card-form {
+    @apply rounded-2xl border border-green-100 bg-white p-4 shadow-sm sm:p-6;
+  }
+
+  .card-interactive {
+    @apply block rounded-2xl border border-green-100 bg-white p-4 shadow-sm transition active:scale-[0.99] hover:border-green-300 hover:shadow-md;
+  }
+
+  .back-link {
+    @apply inline-flex min-h-11 items-center text-sm font-medium text-green-600 active:text-green-800;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold text-green-800 sm:text-3xl;
+  }
+
+  .section-title {
+    @apply text-lg font-semibold text-gray-800;
+  }
+
+  .page-stack {
+    @apply space-y-6 sm:space-y-8;
+  }
+
+  .list-item-interactive {
+    @apply flex min-h-[3.75rem] items-center justify-between gap-3 rounded-2xl border border-green-100 bg-white p-4 shadow-sm transition active:scale-[0.99] active:bg-green-50/50;
+  }
+
+  .edit-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+    width: min(calc(100% - 2rem), 28rem);
+    max-height: min(
+      92dvh,
+      calc(
+        100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) -
+          2rem
+      )
+    );
+    transform: translate(-50%, -50%);
+    border: 0;
+    border-radius: 1rem;
+    background: transparent;
+    padding: 0;
+    overflow: visible;
+    box-shadow: none;
+  }
+
+  .edit-dialog::backdrop {
+    background: rgb(0 0 0 / 0.5);
+  }
+
+  .edit-dialog-panel {
+    display: flex;
+    max-height: min(
+      92dvh,
+      calc(
+        100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) -
+          2rem
+      )
+    );
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 1rem;
+    border: 1px solid var(--color-green-100, #dcfce7);
+    background: white;
+    box-shadow:
+      0 20px 25px -5px rgb(0 0 0 / 0.1),
+      0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+
+  .edit-dialog-header {
+    @apply flex shrink-0 items-center justify-between gap-3 border-b border-green-100 px-4 py-2.5 sm:px-5;
+  }
+
+  .edit-dialog-close {
+    @apply inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg text-gray-500 transition active:bg-gray-100 hover:text-gray-700;
+  }
+
+  .edit-dialog-body {
+    @apply overflow-y-auto px-4 py-3 sm:px-5 sm:py-4;
+  }
+
+  .edit-dialog-form form {
+    @apply space-y-3;
+  }
+
+  .edit-dialog-form .field-label {
+    @apply text-xs;
+  }
+
+  .edit-dialog-form .field-input {
+    @apply mt-1 min-h-10 py-2 text-sm;
+  }
+
+  .edit-dialog-form .field-textarea {
+    @apply mt-1 min-h-[4.5rem] max-h-[4.5rem] resize-none py-2 text-sm;
+  }
+
+  .edit-dialog-form .btn-primary {
+    @apply mt-1 min-h-10 py-2 text-sm;
+  }
+
+  .edit-dialog-body form.space-y-4 .field-input {
+    @apply min-h-10 py-2 text-sm;
+  }
+
+  .edit-dialog-body form.space-y-4 .field-textarea {
+    @apply py-2 text-sm;
+  }
+}
+
+/* iPhone などのホームインジケーター余白 */
+.pb-nav-safe {
+  padding-bottom: calc(4.5rem + var(--safe-bottom));
+}
+
+@media (min-width: 768px) {
+  .pb-nav-safe {
+    padding-bottom: 1.5rem;
+  }
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
 }
