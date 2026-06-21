@@ -41,7 +41,8 @@ export function AreaHero({
                   src={url}
                   alt=""
                   width={480}
-                  className="h-full w-full object-cover"
+                  fit="cover"
+                  className="h-full w-full"
                   loading={index === 0 ? "eager" : "lazy"}
                   fetchPriority={index === 0 ? "high" : "auto"}
                 />

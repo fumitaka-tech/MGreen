@@ -345,13 +345,14 @@ function PhotoGallery({ photos }: { photos: string[] }) {
         {photos.map((url, index) => (
           <div
             key={`${url}-${index}`}
-            className="relative h-60 w-[min(85vw,20rem)] shrink-0 snap-center overflow-hidden rounded-xl bg-green-100 shadow-sm"
+            className="relative flex h-72 w-[min(85vw,20rem)] shrink-0 snap-center items-center justify-center overflow-hidden rounded-xl bg-green-100 shadow-sm"
           >
             <OptimizedImage
               src={url}
               alt={`成長記録の写真 ${index + 1}`}
               width={640}
-              className="h-full w-full object-cover"
+              height={480}
+              fit="contain"
               loading="lazy"
             />
             {photos.length > 1 && (
