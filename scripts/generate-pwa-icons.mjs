@@ -12,10 +12,11 @@ const source = path.join(
 const iconsDir = path.join(root, "public/icons");
 const appDir = path.join(root, "src/app");
 
-const background = { r: 240, g: 253, b: 244, alpha: 1 };
+const background = { r: 255, g: 255, b: 255, alpha: 1 };
 
 async function createSquareMaster() {
   return sharp(source)
+    .flatten({ background })
     .resize(1024, 1024, {
       fit: "contain",
       background,
