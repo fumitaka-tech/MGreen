@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { PwaRegister } from "@/components/pwa-register";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,10 +16,21 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MGreen - わが家の植物ノート",
   description: "家族の植物をエリアごとに管理し、成長を記録するアプリ",
+  applicationName: "MGreen",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "MGreen",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/icon-180.png", sizes: "180x180", type: "image/png" }],
+  },
+  formatDetection: {
+    telephone: false,
   },
 };
 
@@ -40,6 +52,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col overscroll-none text-gray-800">
+        <PwaRegister />
         {children}
       </body>
     </html>
