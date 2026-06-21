@@ -58,7 +58,13 @@ async function main() {
   await sharp(master).resize(512, 512).png().toFile(path.join(appDir, "icon.png"));
   await sharp(master).resize(180, 180).png().toFile(path.join(appDir, "apple-icon.png"));
 
-  console.log("Generated PWA icons in public/icons and src/app");
+  await sharp(source)
+    .flatten({ background })
+    .resize(128, 128, { fit: "contain", background })
+    .png()
+    .toFile(path.join(root, "public/logo.png"));
+
+  console.log("Generated PWA icons in public/icons, src/app, and public/logo.png");
 }
 
 main().catch((error) => {
