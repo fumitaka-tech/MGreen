@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { OptimizedImage } from "@/components/optimized-image";
 import { areaTypeLabel } from "@/lib/utils";
 
 export function AreaHero({
@@ -36,12 +37,13 @@ export function AreaHero({
                   photos.length === 3 && index === 0 ? "row-span-2" : ""
                 }`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <OptimizedImage
                   src={url}
                   alt=""
+                  width={480}
                   className="h-full w-full object-cover"
-                  loading="lazy"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
                 />
               </div>
             ))}

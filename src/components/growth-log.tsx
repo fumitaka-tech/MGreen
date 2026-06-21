@@ -6,10 +6,12 @@ import { createClient } from "@/lib/supabase/client";
 import {
   createGrowthLog,
   deleteGrowthLog,
+  loadMoreGrowthLogs,
   updateGrowthLog,
 } from "@/app/actions/growth-logs";
 import { analyzePlantImageForStatus } from "@/app/actions/plant-ai";
 import { AiInsightsPanel } from "@/components/ai-insights-panel";
+import { OptimizedImage } from "@/components/optimized-image";
 import type { GrowthLogWithPhotos } from "@/types/database";
 import type { AiInsights } from "@/types/plant-ai";
 import {
@@ -345,10 +347,10 @@ function PhotoGallery({ photos }: { photos: string[] }) {
             key={`${url}-${index}`}
             className="relative h-60 w-[min(85vw,20rem)] shrink-0 snap-center overflow-hidden rounded-xl bg-green-100 shadow-sm"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <OptimizedImage
               src={url}
               alt={`成長記録の写真 ${index + 1}`}
+              width={640}
               className="h-full w-full object-cover"
               loading="lazy"
             />
@@ -671,12 +673,36 @@ function TimelineEntry({
 }
 
 export function GrowthTimeline({
-  logs,
+  logs: initialLogs,
   plantId,
+  totalLogCount,
 }: {
   logs: GrowthLogWithPhotos[];
   plantId: string;
+  totalLogCount?: number;
 }) {
+  const [logs, setLogs] = useState(initialLogs);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const total = totalLogCount ?? initialLogs.length;
+  const hasMore = logs.length < total;
+
+  async function handleLoadMore() {
+    setLoadError(null);
+    setIsLoadingMore(true);
+    try {
+      const more = await loadMoreGrowthLogs(plantId, logs.length);
+      setLogs((prev) => [...prev, ...more]);
+    } catch (err) {
+      setLoadError(
+        err instanceof Error ? err.message : "読み込みに失敗しました"
+      );
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }
+
   if (logs.length === 0) {
     return (
       <p className="py-6 text-center text-sm text-gray-500">
@@ -690,6 +716,23 @@ export function GrowthTimeline({
       {logs.map((log) => (
         <TimelineEntry key={log.id} log={log} plantId={plantId} />
       ))}
+      {hasMore && (
+        <div className="text-center">
+          {loadError && (
+            <p className="mb-2 text-sm text-red-600">{loadError}</p>
+          )}
+          <button
+            type="button"
+            onClick={handleLoadMore}
+            disabled={isLoadingMore}
+            className="btn-secondary !min-h-11 px-6"
+          >
+            {isLoadingMore
+              ? "読み込み中..."
+              : `さらに表示（残り ${total - logs.length} 件）`}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -699,11 +742,13 @@ export function GrowthLogSection({
   plantNickname,
   plantSpeciesName,
   logs,
+  totalLogCount,
 }: {
   plantId: string;
   plantNickname: string;
   plantSpeciesName?: string | null;
   logs: GrowthLogWithPhotos[];
+  totalLogCount?: number;
 }) {
   return (
     <section className="space-y-4">
@@ -726,7 +771,11 @@ export function GrowthLogSection({
           )}
         </EditDialog>
       </div>
-      <GrowthTimeline logs={logs} plantId={plantId} />
+      <GrowthTimeline
+        logs={logs}
+        plantId={plantId}
+        totalLogCount={totalLogCount}
+      />
     </section>
   );
 }

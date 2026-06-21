@@ -13,7 +13,7 @@ import { createClient } from "@/lib/supabase/client";
 import { prepareImageForAnalysis } from "@/lib/image";
 import { uploadPlantPhotos } from "@/lib/plant-photos-upload";
 import { createId, toDatetimeLocalValue } from "@/lib/utils";
-import type { Area } from "@/types/database";
+import type { AreaOption } from "@/types/database";
 import type {
   AiInsights,
   PlantNameSuggestion,
@@ -60,7 +60,7 @@ export function PlantRegistrationForm({
   areas,
   defaultAreaId,
 }: {
-  areas: Area[];
+  areas: AreaOption[];
   defaultAreaId?: string;
 }) {
   const router = useRouter();

@@ -5,31 +5,11 @@ import { deletePlantById } from "@/app/actions/plants";
 import { EditDialog } from "@/components/edit-dialog";
 import { GrowthLogSection } from "@/components/growth-log";
 import { PlantForm } from "@/components/plant-form";
+import { fetchGrowthLogsWithPhotos } from "@/lib/growth-logs-query";
 import { areaTypeLabel, formatDate } from "@/lib/utils";
-import type {
-  Area,
-  GrowthLog,
-  GrowthLogPhoto,
-  GrowthLogWithPhotos,
-  PlantWithArea,
-} from "@/types/database";
+import type { AreaOption, PlantWithArea } from "@/types/database";
 
-function attachPhotosToLogs(
-  logs: GrowthLog[],
-  photos: GrowthLogPhoto[]
-): GrowthLogWithPhotos[] {
-  return logs.map((log) => ({
-    ...log,
-    growth_log_photos: photos
-      .filter((photo) => photo.growth_log_id === log.id)
-      .sort((a, b) => a.sort_order - b.sort_order)
-      .map(({ id, photo_url, sort_order }) => ({
-        id,
-        photo_url,
-        sort_order,
-      })),
-  }));
-}
+const INITIAL_LOGS_LIMIT = 20;
 
 export default async function PlantDetailPage({
   params,
@@ -39,46 +19,22 @@ export default async function PlantDetailPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: plantData } = await supabase
-    .from("plants")
-    .select("*, areas(id, name, type)")
-    .eq("id", id)
-    .single();
+  const [{ data: plantData }, { data: allAreas }, logsResult] =
+    await Promise.all([
+      supabase
+        .from("plants")
+        .select("*, areas(id, name, type)")
+        .eq("id", id)
+        .single(),
+      supabase.from("areas").select("id, name, type").order("name"),
+      fetchGrowthLogsWithPhotos(supabase, id, { limit: INITIAL_LOGS_LIMIT }),
+    ]);
 
   if (!plantData) notFound();
 
   const plant = plantData as unknown as PlantWithArea;
   const area = plant.areas;
-
-  const { data: logsRaw } = await supabase
-    .from("growth_logs")
-    .select("*")
-    .eq("plant_id", id)
-    .order("logged_at", { ascending: false });
-
-  const logIds = (logsRaw ?? []).map((log) => log.id);
-
-  let photosRaw: GrowthLogPhoto[] = [];
-  if (logIds.length > 0) {
-    const { data, error } = await supabase
-      .from("growth_log_photos")
-      .select("*")
-      .in("growth_log_id", logIds)
-      .order("sort_order", { ascending: true });
-
-    if (error) throw new Error(error.message);
-    photosRaw = (data ?? []) as GrowthLogPhoto[];
-  }
-
-  const logs = attachPhotosToLogs(
-    (logsRaw ?? []) as GrowthLog[],
-    photosRaw
-  );
-
-  const { data: allAreas } = await supabase
-    .from("areas")
-    .select("*")
-    .order("name");
+  const { logs, total: totalLogCount } = logsResult;
 
   return (
     <div className="page-stack">
@@ -111,7 +67,7 @@ export default async function PlantDetailPage({
           <div className="flex shrink-0 items-center gap-1">
             <EditDialog title="植物の情報を編集">
               <PlantForm
-                areas={(allAreas ?? []) as Area[]}
+                areas={allAreas ?? []}
                 plant={{
                   id: plant.id,
                   area_id: plant.area_id,
@@ -137,6 +93,7 @@ export default async function PlantDetailPage({
         plantNickname={plant.nickname}
         plantSpeciesName={plant.species_name}
         logs={logs}
+        totalLogCount={totalLogCount}
       />
     </div>
   );

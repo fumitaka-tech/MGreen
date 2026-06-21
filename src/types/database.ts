@@ -199,6 +199,7 @@ export type Database = {
 
 export type Household = Database["public"]["Tables"]["households"]["Row"];
 export type Area = Database["public"]["Tables"]["areas"]["Row"];
+export type AreaOption = Pick<Area, "id" | "name" | "type">;
 export type Plant = Database["public"]["Tables"]["plants"]["Row"];
 export type GrowthLog = Database["public"]["Tables"]["growth_logs"]["Row"];
 export type GrowthLogPhoto =

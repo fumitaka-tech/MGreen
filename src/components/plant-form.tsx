@@ -1,12 +1,12 @@
 import { createPlant, updatePlant } from "@/app/actions/plants";
-import type { Area, Plant } from "@/types/database";
+import type { AreaOption, Plant } from "@/types/database";
 
 export function PlantForm({
   areas,
   defaultAreaId,
   plant,
 }: {
-  areas: Area[];
+  areas: AreaOption[];
   defaultAreaId?: string;
   plant?: Plant;
 }) {

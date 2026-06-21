@@ -7,6 +7,7 @@ import {
   deleteStoragePathsFromUrls,
 } from "@/lib/plant-photos-storage";
 import { parseDatetimeLocalAsJST } from "@/lib/utils";
+import { fetchGrowthLogsWithPhotos } from "@/lib/growth-logs-query";
 import type { AiInsights } from "@/types/plant-ai";
 
 export async function createGrowthLog(formData: FormData) {
@@ -132,4 +133,15 @@ export async function deleteGrowthLog(logId: string, plantId: string) {
 
   revalidatePath(`/plants/${plantId}`);
   revalidatePath("/");
+}
+
+const LOGS_PAGE_SIZE = 20;
+
+export async function loadMoreGrowthLogs(plantId: string, offset: number) {
+  const supabase = await createClient();
+  const { logs } = await fetchGrowthLogsWithPhotos(supabase, plantId, {
+    limit: LOGS_PAGE_SIZE,
+    offset,
+  });
+  return logs;
 }

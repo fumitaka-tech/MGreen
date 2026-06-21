@@ -1,4 +1,5 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { deleteAreaById } from "@/app/actions/areas";
@@ -7,9 +8,20 @@ import { AreaHero } from "@/components/area-hero";
 import { AreaForm } from "@/components/area-form";
 import { EditDialog } from "@/components/edit-dialog";
 import { EmptyState } from "@/components/empty-state";
-import { PlantRegistrationForm } from "@/components/plant-registration-form";
 import { getRecentAreaPhotoUrls } from "@/lib/area-photos";
 import type { Plant } from "@/types/database";
+
+const PlantRegistrationForm = dynamic(
+  () =>
+    import("@/components/plant-registration-form").then((mod) => ({
+      default: mod.PlantRegistrationForm,
+    })),
+  {
+    loading: () => (
+      <div className="h-48 animate-pulse rounded-2xl bg-green-50" />
+    ),
+  }
+);
 
 export default async function AreaDetailPage({
   params,
@@ -27,20 +39,18 @@ export default async function AreaDetailPage({
 
   if (!area) notFound();
 
-  const { data: plants } = await supabase
-    .from("plants")
-    .select("*")
-    .eq("area_id", id)
-    .order("created_at", { ascending: true });
+  const [{ data: plants }, { data: allAreas }] = await Promise.all([
+    supabase
+      .from("plants")
+      .select("*")
+      .eq("area_id", id)
+      .order("created_at", { ascending: true }),
+    supabase.from("areas").select("id, name, type").order("name"),
+  ]);
 
   const plantList = (plants ?? []) as Plant[];
   const plantIds = plantList.map((plant) => plant.id);
   const recentPhotoUrls = await getRecentAreaPhotoUrls(supabase, plantIds);
-
-  const { data: allAreas } = await supabase
-    .from("areas")
-    .select("*")
-    .order("name");
 
   return (
     <div className="page-stack">
